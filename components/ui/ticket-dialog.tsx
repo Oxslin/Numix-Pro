@@ -280,56 +280,45 @@ const TicketDialog: React.FC<TicketDialogProps> = ({
 
   // Auto-completar decenas con verificación robusta - SOLUCIÓN MEJORADA PARA PRODUCCIÓN
   // Auto-completar decenas - VERSIÓN CORREGIDA
-  const autoCompleteDecenas = useCallback(async (rowId: string, baseNumber: number, times: string) => {
-    if (processingRef.current || !isValidForAutoComplete(baseNumber.toString(), times)) {
+ const autoCompleteDecenas = useCallback(async (rowId: string, baseNumber: number, times: string) => {
+  if (processingRef.current || !isValidForAutoComplete(baseNumber.toString(), times)) {
+    return
+  }
+
+  processingRef.current = true
+  setIsProcessing(true)
+
+  try {
+    const startDecena = Math.floor(baseNumber / 10) * 10
+    const numbersToAdd: number[] = []
+
+    // Generar números de la decena (excluyendo el actual)
+    for (let i = startDecena; i < startDecena + 10; i++) {
+      if (i !== baseNumber && i >= 0 && i <= 99) {
+        numbersToAdd.push(i)
+      }
+    }
+
+    // Verificar límite de filas
+    if (ticketRows.length + numbersToAdd.length > MAX_ROWS_LIMIT) {
+      console.warn(`Límite de ${MAX_ROWS_LIMIT} filas alcanzado`)
       return
     }
-  
-    processingRef.current = true
-    setIsProcessing(true)
-  
-    try {
-      const startDecena = Math.floor(baseNumber / 10) * 10
-      const numbersToAdd: number[] = []
-  
-      // Generar números de la decena (excluyendo el actual)
-      for (let i = startDecena; i < startDecena + 10; i++) {
-        if (i !== baseNumber && i >= 0 && i <= 99) {
-          numbersToAdd.push(i)
-        }
-      }
-  
-      // Verificar límite de filas
-      if (ticketRows.length + numbersToAdd.length > MAX_ROWS_LIMIT) {
-        console.warn(`Límite de ${MAX_ROWS_LIMIT} filas alcanzado`)
-        return
-      }
-  
-      // Crear filas de forma secuencial con delay aumentado para producción
-      for (const number of numbersToAdd) {
-        onAddRow()
-  
-        // Delay aumentado para producción (300ms en lugar de 100ms)
-        const delay = process.env.NODE_ENV === 'production' ? 300 : 150
-        await new Promise(resolve => setTimeout(resolve, delay))
-  
-        // Encontrar la última fila creada
-        const allInputs = Array.from(inputRefs.current.keys())
-        const timesInputs = allInputs.filter(key => key.startsWith('times-'))
-  
-        if (timesInputs.length > 0) {
-          const lastRowId = timesInputs[timesInputs.length - 1].replace('times-', '')
-          onInputChange(lastRowId, "times", times)
-          onInputChange(lastRowId, "actions", number.toString())
-        }
-      }
-    } catch (error) {
-      console.error('Error en auto-completar decenas:', error)
-    } finally {
-      processingRef.current = false
-      setIsProcessing(false)
+
+    // Crear todas las filas directamente con sus valores - SIN DELAYS NI DOM REFS
+    for (const number of numbersToAdd) {
+      onAddRow({
+        times: times,
+        actions: number.toString()
+      })
     }
-  }, [onAddRow, onInputChange, isValidForAutoComplete, ticketRows.length])
+  } catch (error) {
+    console.error('Error en auto-completar decenas:', error)
+  } finally {
+    processingRef.current = false
+    setIsProcessing(false)
+  }
+}, [onAddRow, onInputChange, isValidForAutoComplete, ticketRows.length])
 
   // ==========================================
   // MANEJADORES DE EVENTOS ESTABLES

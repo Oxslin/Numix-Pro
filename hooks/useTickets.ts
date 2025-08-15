@@ -164,14 +164,18 @@ export function useTickets({
       return prevRows.filter(row => row.id !== id)
     })
   }, [])
-
-  const addNewRow = useCallback(() => {
-    const newRowId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    setTicketRows(prevRows => [
-      ...prevRows, 
-      { id: newRowId, times: "", actions: "", value: 0 }
-    ])
-  }, [])
+const addNewRow = useCallback((initialValues?: { times?: string; actions?: string }) => {
+  const newRowId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  setTicketRows(prevRows => [
+    ...prevRows, 
+    { 
+      id: newRowId, 
+      times: initialValues?.times || "", 
+      actions: initialValues?.actions || "", 
+      value: initialValues?.times ? parseInt(initialValues.times, 10) * PRICE_PER_TIME || 0 : 0
+    }
+  ])
+}, [])
 
   const resetForm = useCallback(() => {
     setClientName("")
