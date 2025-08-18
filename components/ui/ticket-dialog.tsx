@@ -345,23 +345,21 @@ const TicketDialog: React.FC<TicketDialogProps> = ({
         // Ir a tiempos de la siguiente fila o crear nueva
         const nextRowIndex = rowIndex + 1
 
-        if (nextRowIndex >= ticketRows.length) {
+  if (nextRowIndex >= ticketRows.length) {
   // Crear nueva fila
   onAddRow()
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      // Buscar el input de la nueva fila de manera más robusta
-      const allInputs = Array.from(inputRefs.current.keys())
-      const timesInputs = allInputs.filter(key => key.startsWith('times-'))
-      
-      if (timesInputs.length > 0) {
-        const lastTimesKey = timesInputs[timesInputs.length - 1]
-        const lastInput = inputRefs.current.get(lastTimesKey)
-        if (lastInput) {
-          lastInput.focus()
-        }
+    // Buscar el input de la nueva fila de manera más robusta
+    const allInputs = Array.from(inputRefs.current.keys())
+    const timesInputs = allInputs.filter(key => key.startsWith('times-'))
+    
+    if (timesInputs.length > 0) {
+      const lastTimesKey = timesInputs[timesInputs.length - 1]
+      const lastInput = inputRefs.current.get(lastTimesKey)
+      if (lastInput) {
+        lastInput.focus()
       }
-    })
+    }
   })
 } else {
           // Ir a la siguiente fila existente
