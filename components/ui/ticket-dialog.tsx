@@ -346,26 +346,24 @@ const TicketDialog: React.FC<TicketDialogProps> = ({
         const nextRowIndex = rowIndex + 1
 
         if (nextRowIndex >= ticketRows.length) {
-          // Crear nueva fila
-          onAddRow()
-          setTimeout(() => {
-            // Buscar el input de la nueva fila de manera más robusta
-            const allInputs = Array.from(inputRefs.current.keys())
-            const timesInputs = allInputs.filter(key => key.startsWith('times-'))
-            
-            if (timesInputs.length > 0) {
-              const lastTimesKey = timesInputs[timesInputs.length - 1]
-              const lastInput = inputRefs.current.get(lastTimesKey)
-              if (lastInput) {
-                lastInput.focus()
-              } else {
-                // Fallback DOM
-                const fallbackInput = document.querySelector(`[aria-label="Tiempos para fila ${nextRowIndex + 1}"]`) as HTMLInputElement
-                fallbackInput?.focus()
-              }
-            }
-          }, 150)
-        } else {
+  // Crear nueva fila
+  onAddRow()
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      // Buscar el input de la nueva fila de manera más robusta
+      const allInputs = Array.from(inputRefs.current.keys())
+      const timesInputs = allInputs.filter(key => key.startsWith('times-'))
+      
+      if (timesInputs.length > 0) {
+        const lastTimesKey = timesInputs[timesInputs.length - 1]
+        const lastInput = inputRefs.current.get(lastTimesKey)
+        if (lastInput) {
+          lastInput.focus()
+        }
+      }
+    })
+  })
+} else {
           // Ir a la siguiente fila existente
           const nextRowId = ticketRows[nextRowIndex]?.id
           if (nextRowId) {
