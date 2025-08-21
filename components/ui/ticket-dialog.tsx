@@ -71,6 +71,57 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
   onAutoComplete, 
   inputRefs 
 }) => {
+  const actionsInputRef = useRef<HTMLInputElement>(null)
+  const [isClickingNumber, setIsClickingNumber] = useState(false)
+
+  const handleActionsClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget
+    const clickPosition = e.nativeEvent.offsetX
+    const inputWidth = input.offsetWidth
+    const textValue = row.actions
+    
+    // Solo activar auto-completado si hay un número de 2 dígitos
+    if (textValue.length >= 2) {
+      // Calcular el ancho aproximado del texto
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      if (context) {
+        context.font = '16px sans-serif' // Mismo tamaño que el input
+        const textWidth = context.measureText(textValue).width
+        const textStartX = (inputWidth - textWidth) / 2 // Texto centrado
+        const textEndX = textStartX + textWidth
+        
+        // Solo activar si el clic fue dentro del área del texto
+        if (clickPosition >= textStartX && clickPosition <= textEndX) {
+          const currentValue = parseInt(row.actions)
+          const timesValue = parseInt(row.times)
+          
+          if (!isNaN(currentValue) && currentValue >= 10 && currentValue <= 99 && 
+              !isNaN(timesValue) && timesValue > 0) {
+            setIsClickingNumber(true)
+            // Pequeño delay para evitar conflictos con la edición
+            setTimeout(() => {
+              onAutoComplete(row.id)
+              setIsClickingNumber(false)
+            }, 150)
+            return
+          }
+        }
+      }
+    }
+    
+    // Si llegamos aquí, permitir edición normal
+    setIsClickingNumber(false)
+  }
+
+  const handleActionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Prevenir cambios durante el auto-completado
+    if (isClickingNumber) {
+      return
+    }
+    onInputChange(row.id, "actions", e.target.value)
+  }
+
   return (
     <div className="grid grid-cols-[2fr_2fr_1.5fr_auto] gap-4 items-center">
       {/* Campo Tiempos */}
@@ -109,6 +160,7 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
             ref={(el) => {
               if (el) {
                 inputRefs.current.set(`actions-${row.id}`, el)
+                actionsInputRef.current = el
               } else {
                 inputRefs.current.delete(`actions-${row.id}`)
               }
@@ -117,20 +169,14 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
             min="0"
             max="99"
             value={row.actions}
-            onChange={(e) => onInputChange(row.id, "actions", e.target.value)}
+            onChange={handleActionsChange}
             onKeyDown={(e) => onKeyDown(e, row.id, "actions", index)}
-            onClick={() => {
-              // Auto-completar decenas al hacer clic en el campo si el valor es válido
-              const currentValue = parseInt(row.actions)
-              if (!isNaN(currentValue) && currentValue >= 10 && currentValue <= 99 && row.times && row.times !== "0") {
-                onAutoComplete(row.id)
-              }
-            }}
-            className="bg-input border-border text-foreground text-center h-10 text-base transition-all focus:ring-2 focus:ring-primary/20 cursor-pointer [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+            onClick={handleActionsClick}
+            className="bg-input border-border text-foreground text-center h-10 text-base transition-all focus:ring-2 focus:ring-primary/20 cursor-text [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
             style={{ fontSize: '16px' }}
             aria-label={`Acciones para fila ${index + 1}`}
             placeholder="00"
-            title="Haz clic para auto-completar decena"
+            title="Haz clic directamente sobre el número para auto-completar decena"
           />
         )}
       </div>

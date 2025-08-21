@@ -111,7 +111,8 @@ export default function EventDetailsPage({ params }: { params: { id: string } | 
     totalTimes,
     totalPurchase,
     isProcessing,
-    loadTicketForEdit  // ✅ Agregar esta línea
+    loadTicketForEdit,
+    resetForm  // ✅ Agregar esta línea
   } = useTickets({
     eventId: resolvedEventId!,
     setTickets: (ticketsOrUpdater) => {
@@ -745,6 +746,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } | 
             setIsCreateTicketOpen(open)
             if (!open) {
               setTicketError(null)
+              resetForm() // ✅ Limpiar el formulario al cerrar
             }
           }}
           clientName={clientName}
