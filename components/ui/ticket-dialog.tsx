@@ -53,7 +53,7 @@ interface TouchState {
 
 // Constantes
 const AUTO_COMPLETE_DELAY = 100 // ms
-const MAX_ROWS_LIMIT = 100
+const MAX_ROWS_LIMIT = 500
 const LONG_PRESS_DURATION = 500 // ms
 
 // ==========================================

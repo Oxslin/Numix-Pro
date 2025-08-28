@@ -682,7 +682,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } | 
                       />
                     )}
                     
-                   <div 
+                  <div 
   className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 flex-1 cursor-pointer"
   onClick={() => handleEditTicket(ticket)}
 >
@@ -690,9 +690,18 @@ export default function EventDetailsPage({ params }: { params: { id: string } | 
     <h4 className="text-base font-semibold text-primary truncate">{ticket.clientName}</h4>
     <div className="text-sm sm:text-base font-bold text-primary">${ticket.amount.toFixed(2)}</div>
   </div>
-  <div className="text-left sm:text-right w-full sm:w-auto sm:flex-shrink-0">
+  <div className="text-left sm:text-right w-full sm:w-auto sm:flex-shrink-0 sm:max-w-lg">
     <div className="text-xs text-muted-foreground">Números</div>
-    <div className="text-sm sm:text-base font-bold text-primary break-words">{ticket.numbers}</div>
+    <div 
+      className="text-sm sm:text-base font-bold text-primary break-words"
+      style={{
+        wordSpacing: '0.25rem',
+        lineHeight: '1.4',
+        maxWidth: '60ch'
+      }}
+    >
+      {ticket.numbers}
+    </div>
   </div>
 </div>
                     

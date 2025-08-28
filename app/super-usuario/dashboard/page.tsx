@@ -737,7 +737,7 @@ setVendors(vendors.map((v) => (v.id === id ? { ...v, showPassword: !v.showPasswo
                             <span className="text-center block text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell>
+                                                <TableCell>
                           <div className="flex items-center justify-center gap-2">
                             {event.status === "closed_not_awarded" && (
                               <Button
@@ -750,6 +750,20 @@ setVendors(vendors.map((v) => (v.id === id ? { ...v, showPassword: !v.showPasswo
                                 }}
                               >
                                 <Award className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {event.status === "closed_awarded" && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 text-blue-500"
+                                onClick={() => {
+                                  setCurrentEvent(event)
+                                  setIsAwardingEvent(true)
+                                }}
+                                title="Editar números premiados"
+                              >
+                                <Edit className="h-4 w-4" />
                               </Button>
                             )}
                             <Button

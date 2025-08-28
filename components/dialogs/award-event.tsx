@@ -19,16 +19,26 @@ export function AwardEventDialog({ open, onOpenChange, event, onSubmit }: AwardE
     thirdPrize: "",
   })
 
-  // Resetear los números cuando se abre el diálogo
+  // Cambiar el useEffect en las líneas 24-40:
   useEffect(() => {
-    if (open) {
-      setNumbers({
-        firstPrize: "",
-        secondPrize: "",
-        thirdPrize: "",
-      })
+    if (open && event) {
+      if (event.status === "closed_awarded" && event.awardedNumbers) {
+        // Si el evento ya fue premiado, pre-llenar con los números existentes
+        setNumbers({
+          firstPrize: event.awardedNumbers.firstPrize || "",
+          secondPrize: event.awardedNumbers.secondPrize || "",
+          thirdPrize: event.awardedNumbers.thirdPrize || "",
+        })
+      } else {
+        // Si es un evento nuevo, limpiar los campos
+        setNumbers({
+          firstPrize: "",
+          secondPrize: "",
+          thirdPrize: "",
+        })
+      }
     }
-  }, [open])
+  }, [open, event])
 
   if (!event && open) {
     return null

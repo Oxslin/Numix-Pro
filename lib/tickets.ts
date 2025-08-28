@@ -200,11 +200,11 @@ export async function getTickets(eventId: string, signal?: AbortSignal): Promise
     }
 
     const tickets = data?.map(mapTicketFromSupabase) || []
-    
+
     console.log(`✅ Tickets obtenidos de Supabase: ${tickets.length} para vendedor ${currentVendorEmail}`)
-    
-    // Si Supabase devuelve menos tickets que localStorage, usar localStorage
-    const finalTickets = tickets.length >= fallbackTickets.length ? tickets : fallbackTickets
+
+    // CORREGIDO: Siempre usar datos de Supabase como fuente de verdad
+    const finalTickets = tickets
     
     // Guardar en cache y localStorage
     ticketCache.set(cacheKey, finalTickets)

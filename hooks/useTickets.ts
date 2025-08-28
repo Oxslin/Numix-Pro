@@ -76,7 +76,7 @@ function validateTicketBeforeSubmit(ticket: Omit<Ticket, "id">): ValidationResul
     }
     
     // Validar cantidad de veces (optimizado)
-    if (times > 100) {
+    if (times > 999999) {
       return { isValid: false, error: `Cantidad inválida para el número ${row.actions}: ${times}` }
     }
     
