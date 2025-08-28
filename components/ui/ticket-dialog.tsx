@@ -81,7 +81,7 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
     const textValue = row.actions
     
     // Solo activar auto-completado si hay un número de 2 dígitos
-    if (textValue.length >= 2) {
+    if (textValue.length >= 1) {
       // Calcular el ancho aproximado del texto
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d')
@@ -96,7 +96,7 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
           const currentValue = parseInt(row.actions)
           const timesValue = parseInt(row.times)
           
-          if (!isNaN(currentValue) && currentValue >= 10 && currentValue <= 99 && 
+          if (!isNaN(currentValue) && currentValue >= 0 && currentValue <= 99 && 
               !isNaN(timesValue) && timesValue > 0) {
             setIsClickingNumber(true)
             // Pequeño delay para evitar conflictos con la edición
@@ -176,7 +176,7 @@ const TicketRowComponent = memo<TicketRowComponentProps>(({
             style={{ fontSize: '16px' }}
             aria-label={`Acciones para fila ${index + 1}`}
             placeholder="00"
-            title="Haz clic directamente sobre el número para auto-completar decena"
+            title="Haz clic directamente sobre el número para auto-completar decena (0-99)"
           />
         )}
       </div>
@@ -316,7 +316,7 @@ const TicketDialog: React.FC<TicketDialogProps> = ({
     return (
       !isNaN(num) &&
       !isNaN(timesNum) &&
-      num >= 10 &&
+      num >= 0 &&
       num <= 99 &&
       timesNum > 0 &&
       times.trim() !== "" &&
