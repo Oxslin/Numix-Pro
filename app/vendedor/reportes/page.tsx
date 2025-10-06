@@ -5,7 +5,7 @@ import React from "react"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
-import { Clock, Ticket, ChevronRight, Search } from "lucide-react"
+import { Clock, Ticket, ChevronRight, Search, Trophy, Users, DollarSign } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
 import { debounce } from "@/lib/performance-utils"
@@ -40,6 +40,14 @@ interface TicketData {
   timesSold: number
 }
 
+interface Winner {
+  id: string
+  clientName: string
+  number: string
+  times: number
+  prizeAmount: number
+}
+
 // Componente memoizado para mostrar un número
 const NumberCell = React.memo(
   ({
@@ -66,6 +74,146 @@ const NumberCell = React.memo(
   },
 )
 
+// Función para agrupar ganadores por tipo de premio
+const groupWinnersByPrize = (winners: Winner[]) => {
+  const firstPrize = winners.filter(w => w.prizeAmount === w.times * 11)
+  const secondPrize = winners.filter(w => w.prizeAmount === w.times * 3)
+  const thirdPrize = winners.filter(w => w.prizeAmount === w.times * 2)
+  
+  return { firstPrize, secondPrize, thirdPrize }
+}
+
+// Componente WinnersSection
+const WinnersSection = ({ winners, isLoading }: { winners: Winner[], isLoading: boolean }) => {
+  if (isLoading) {
+    return (
+      <div className="bg-card border border-border rounded-xl p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <h3 className="text-lg font-medium">Mis Ganadores</h3>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="w-8 h-8 border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (winners.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-xl p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <h3 className="text-lg font-medium">Mis Ganadores</h3>
+        </div>
+        <div className="text-center text-muted-foreground py-8">
+          <Trophy className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p>No hay ganadores en este sorteo</p>
+        </div>
+      </div>
+    )
+  }
+
+  const { firstPrize, secondPrize, thirdPrize } = groupWinnersByPrize(winners)
+  const totalWinners = winners.length
+  const totalPrizeAmount = winners.reduce((sum, winner) => sum + winner.prizeAmount, 0)
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-2">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <h3 className="text-lg font-medium">Mis Ganadores</h3>
+        </div>
+        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-1">
+            <Users className="h-4 w-4" />
+            <span>{totalWinners}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <DollarSign className="h-4 w-4" />
+            <span>${totalPrizeAmount.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Primer Premio */}
+        {firstPrize.length > 0 && (
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <h4 className="font-medium text-yellow-600">Primer Premio (×11)</h4>
+              <span className="text-sm text-muted-foreground">({firstPrize.length} ganadores)</span>
+            </div>
+            <div className="space-y-2">
+              {firstPrize.map((winner) => (
+                <div key={winner.id} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div>
+                    <p className="font-medium text-yellow-800">{winner.clientName}</p>
+                    <p className="text-sm text-yellow-600">Número: {winner.number} • {winner.times} veces</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-yellow-700">${winner.prizeAmount.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Segundo Premio */}
+        {secondPrize.length > 0 && (
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <h4 className="font-medium text-purple-600">Segundo Premio (×3)</h4>
+              <span className="text-sm text-muted-foreground">({secondPrize.length} ganadores)</span>
+            </div>
+            <div className="space-y-2">
+              {secondPrize.map((winner) => (
+                <div key={winner.id} className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div>
+                    <p className="font-medium text-purple-800">{winner.clientName}</p>
+                    <p className="text-sm text-purple-600">Número: {winner.number} • {winner.times} veces</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-purple-700">${winner.prizeAmount.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tercer Premio */}
+        {thirdPrize.length > 0 && (
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <h4 className="font-medium text-red-600">Tercer Premio (×2)</h4>
+              <span className="text-sm text-muted-foreground">({thirdPrize.length} ganadores)</span>
+            </div>
+            <div className="space-y-2">
+              {thirdPrize.map((winner) => (
+                <div key={winner.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div>
+                    <p className="font-medium text-red-800">{winner.clientName}</p>
+                    <p className="text-sm text-red-600">Número: {winner.number} • {winner.times} veces</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-red-700">${winner.prizeAmount.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ReportesPage() {
   const router = useRouter()
   const [selectedDate, setSelectedDate] = useState("")
@@ -77,6 +225,8 @@ export default function ReportesPage() {
   const [isResetting, setIsResetting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showLiveReports, setShowLiveReports] = useState(false)
+  const [winners, setWinners] = useState<Winner[]>([])
+  const [isLoadingWinners, setIsLoadingWinners] = useState(false)
 
   // Debounce search query to avoid excessive filtering
   const debouncedSetSearchQuery = useCallback(
@@ -97,6 +247,8 @@ export default function ReportesPage() {
     setClosedDraws([])
     setActiveDraws([])
     setShowLiveReports(false)
+    setWinners([])
+    setIsLoadingWinners(false)
 
     // Efecto visual de reset
     setTimeout(() => {
@@ -106,6 +258,85 @@ export default function ReportesPage() {
 
   // Función para limpiar la pantalla (ahora handleRefresh y handleReset hacen lo mismo)
   const handleReset = handleRefresh
+
+  // Función para cargar ganadores
+  const loadWinners = useCallback(async () => {
+    if (!selectedDraw?.awardedNumbers) {
+      setWinners([])
+      return
+    }
+
+    setIsLoadingWinners(true)
+    try {
+      const currentVendorEmail = localStorage.getItem("currentVendorEmail")
+      if (!currentVendorEmail) {
+        console.error("No se encontró email de vendedor actual")
+        setIsLoadingWinners(false)
+        return
+      }
+
+      // Obtener el cliente admin
+      const { getSupabaseClient } = await import("@/lib/fetch-utils")
+      const supabaseAdmin = getSupabaseClient(true)
+
+      // Obtener tickets del vendedor para este sorteo
+      const { data: tickets, error } = await supabaseAdmin
+        .from("tickets")
+        .select("*")
+        .eq("event_id", selectedDraw.id)
+        .eq("vendor_email", currentVendorEmail)
+
+      if (error) {
+        console.error("Error fetching tickets:", error)
+        setWinners([])
+        setIsLoadingWinners(false)
+        return
+      }
+
+      const winnersData: Winner[] = []
+      const { firstPrize, secondPrize, thirdPrize } = selectedDraw.awardedNumbers
+
+      // Procesar cada ticket
+      tickets?.forEach((ticket) => {
+        const ticketRows = Array.isArray(ticket.rows) ? ticket.rows : JSON.parse(String(ticket.rows || "[]"))
+        
+        ticketRows.forEach((row: any) => {
+          if (row.actions) {
+            const number = row.actions.toString().padStart(2, "0")
+            const times = Number.parseInt(row.times) || 0
+            let prizeAmount = 0
+
+            // Calcular premio según el número
+            if (number === firstPrize) {
+              prizeAmount = times * 11 // Primer premio: ×11
+            } else if (number === secondPrize) {
+              prizeAmount = times * 3  // Segundo premio: ×3
+            } else if (number === thirdPrize) {
+              prizeAmount = times * 2  // Tercer premio: ×2
+            }
+
+            // Solo agregar si hay premio
+            if (prizeAmount > 0) {
+              winnersData.push({
+                id: `${ticket.id}-${row.actions}`,
+                clientName: ticket.client_name,
+                number: number,
+                times: times,
+                prizeAmount: prizeAmount
+              })
+            }
+          }
+        })
+      })
+
+      setWinners(winnersData)
+    } catch (error) {
+      console.error("Error loading winners:", error)
+      setWinners([])
+    } finally {
+      setIsLoadingWinners(false)
+    }
+  }, [selectedDraw])
 
   // Función para cargar sorteos cerrados
   const loadClosedDraws = useCallback(
@@ -368,6 +599,16 @@ export default function ReportesPage() {
     loadTicketData()
   }, [selectedDraw, router])
 
+  // Efecto para cargar ganadores cuando se selecciona un sorteo
+  useEffect(() => {
+    if (selectedDraw && !showLiveReports) {
+      loadWinners()
+    } else {
+      setWinners([])
+      setIsLoadingWinners(false)
+    }
+  }, [selectedDraw, showLiveReports, loadWinners])
+
   // Efecto para actualización automática en reportes en vivo
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -615,8 +856,13 @@ export default function ReportesPage() {
               {/* Summary Cards */}
               <div className="grid grid-cols-2 gap-4">
                 <StatsCard value={totalTimesSold} label="Total tiempos vendidos" />
-                <StatsCard value={`$${totalAmount.toFixed(2)}`} label="Total vendido" />
+                <StatsCard value={`${totalAmount.toFixed(2)}`} label="Total vendido" />
               </div>
+
+              {/* Winners Section - Solo para sorteos cerrados */}
+              {!showLiveReports && selectedDraw && (
+                <WinnersSection winners={winners} isLoading={isLoadingWinners} />
+              )}
 
               {/* Numbers Table */}
               <div className="bg-card border border-border rounded-xl p-4">
